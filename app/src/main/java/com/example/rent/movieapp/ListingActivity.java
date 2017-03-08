@@ -7,6 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.ViewFlipper;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusActivity;
 
@@ -28,7 +30,6 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> {
         Intent intent = new Intent(context, ListingActivity.class);
         intent.putExtra(SEARCH_TITLE, title);
         return intent;
-
     }
 
     @Override
@@ -43,19 +44,31 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> {
 
         noInternetImage = (ImageView) findViewById(R.id.no_internet_image_view);
         viewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
-        getPresenter().getDataAsync(title);
+
+        getPresenter().getDataAsync(title)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::Success, this::Error);
     }
 
-    public void setDataOnUiThread(MovieResult result, boolean isProblemWithInternet) {
+    private void Error(Throwable throwable) {
+        viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
+    }
 
-        runOnUiThread(() -> {
-            if (isProblemWithInternet) {
-                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
-            } else {
-                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
-                adapter.setItems(result.getItems());
-            }
-        });
+    private void Success(MovieResult movieResult) {
+        viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
+        adapter.setItems(movieResult.getItems());
     }
 }
+
+//    public void setDataOnUiThread(MovieResult result, boolean isProblemWithInternet) {
+//
+//        runOnUiThread(() -> {
+//            if (isProblemWithInternet) {
+//                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
+//            } else {
+//                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
+//                adapter.setItems(result.getItems());
+//            }
+//        });
 
