@@ -1,4 +1,4 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.search;
 
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
@@ -9,6 +9,9 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.RadioGroup;
+
+import com.example.rent.movieapp.R;
+import com.example.rent.movieapp.listing.ListingActivity;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -54,7 +57,7 @@ public class SearchActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(java.util.Calendar.YEAR);
+        int year = calendar.get(Calendar.YEAR);
         numberPicker.setMinValue(1950);
         numberPicker.setMaxValue(year);
         numberPicker.setValue(year);

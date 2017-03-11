@@ -1,4 +1,6 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.search;
+
+import com.example.rent.movieapp.listing.MovieItem;
 
 import java.util.List;
 
