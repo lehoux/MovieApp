@@ -20,7 +20,7 @@ public class MovieApplication extends Application implements RetrofitProvider {
     }
 
     @Override
-    public Retrofit retrofitProvider() {
-        return null;
+    public Retrofit provideRetrofit() {
+        return retrofit;
     }
 }

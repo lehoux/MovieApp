@@ -24,7 +24,7 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
 
     private boolean isLoading;
 
-    private OnLoadNextPageListener listener;
+    private OnLoadNextPageListener onLoadNextPageListener;
 
     private CurrentItemListener currentItemListener;
 
@@ -32,13 +32,9 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
 
     private boolean isCounterShown;
 
-    public EndlessScrollListener(LinearLayoutManager layoutManager, ListingPresenter presenter) {
+    public EndlessScrollListener(LinearLayoutManager layoutManager, OnLoadNextPageListener onLoadNextPageListener) {
         this.layoutManager = layoutManager;
-        this.listener = listener;
-    }
-
-    public void setCurrentItemListener(CurrentItemListener currentItemListener) {
-        this.currentItemListener = currentItemListener;
+        this.onLoadNextPageListener = onLoadNextPageListener;
     }
 
     @Override
@@ -63,13 +59,16 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
         Log.d("result", "lastVisibleItemPosition " + lastVisibleItemPosition);
     }
 
-    public void onScrolledStateChanged(RecyclerView recyclerView, int newState) {
+    @Override
+    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
         super.onScrollStateChanged(recyclerView, newState);
 
         if (showOrHideCounter != null) {
             if (isCounterShown && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                showOrHideCounter.hideCounter();
-                isCounterShown = false;
+                recyclerView.postDelayed(() -> {
+                    showOrHideCounter.hideCounter();
+                    isCounterShown = false;
+                }, 3000);
             } else if (!isCounterShown && newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                 showOrHideCounter.showCounter();
                 isCounterShown = true;
@@ -78,15 +77,20 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
     }
 
     private void loadNextPage(int pageNumber) {
-        listener.loadNextPage(pageNumber);
+        onLoadNextPageListener.loadNextPage(pageNumber);
     }
 
     public void setTotalItemsNumber(int totalItemsNumber) {
         this.totalItemsNumber = totalItemsNumber;
+        isLoading = false;
     }
 
-    public void setShowOrHideCounter(ListingActivity showOrHideCounter) {
+    public void setShowOrHideCounter(ShowOrHideCounter showOrHideCounter) {
         this.showOrHideCounter = showOrHideCounter;
+    }
+
+    public void setCurrentItemListener(CurrentItemListener currentItemListener) {
+        this.currentItemListener = currentItemListener;
     }
 }
 
