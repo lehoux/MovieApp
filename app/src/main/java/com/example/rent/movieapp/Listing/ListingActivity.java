@@ -14,6 +14,7 @@ import android.widget.ViewFlipper;
 
 import com.example.rent.movieapp.R;
 import com.example.rent.movieapp.main.CurrentItemListener;
+import com.example.rent.movieapp.main.RetrofitProvider;
 import com.example.rent.movieapp.main.ShowOrHideCounter;
 import com.example.rent.movieapp.search.EndlessScrollListener;
 import com.example.rent.movieapp.search.MovieResult;
@@ -31,7 +32,7 @@ import nucleus.view.NucleusActivity;
  */
 
 @RequiresPresenter(ListingPresenter.class)
-public class ListingActivity extends NucleusActivity<ListingPresenter> implements CurrentItemListener, ShowOrHideCounter{
+public class ListingActivity extends NucleusActivity<ListingPresenter> implements CurrentItemListener, ShowOrHideCounter {
 
 
     public static final int NO_YEAR_SELECTED = -1;
@@ -39,18 +40,14 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     private static final String SEARCH_TITLE = "search_title";
     private static final String SEARCH_TYPE = "search_type";
 
-
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
     @BindView(R.id.no_internet_image_view)
     ImageView noInternetImage;
     @BindView(R.id.view_flipper)
     ViewFlipper viewFlipper;
-    int year = getIntent().getIntExtra(SEARCH_YEAR, NO_YEAR_SELECTED);
     @BindView(R.id.no_result)
     FrameLayout noResults;
-    @BindView(R.id.search_poster)
-    ImageView searchPoster;
     @BindView(R.id.counter)
     TextView counterTextView;
 
@@ -71,7 +68,8 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing);
         ButterKnife.bind(this);
-        recyclerView.setAdapter(adapter);
+        RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
+        getPresenter().setRetrofit(retrofitProvider.provideRetrofit());
         String title = getIntent().getStringExtra(SEARCH_TITLE);
         int year = getIntent().getIntExtra(SEARCH_YEAR, NO_YEAR_SELECTED);
         String type = getIntent().getStringExtra(SEARCH_TYPE);
@@ -80,6 +78,7 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
         recyclerView.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         endlessScrollListener = new EndlessScrollListener(layoutManager, getPresenter());
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(endlessScrollListener);
         endlessScrollListener.setCurrentItemListener(this);
         endlessScrollListener.setShowOrHideCounter(this);
@@ -105,7 +104,7 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     }
 
     private void Success(MovieResult movieResult) {
-        if ("False".equals(movieResult.getResponse())) {
+        if ("False".equalsIgnoreCase(movieResult.getResponse())) {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
         } else {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));

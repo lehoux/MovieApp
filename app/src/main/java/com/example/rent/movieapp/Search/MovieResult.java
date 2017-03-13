@@ -1,6 +1,7 @@
 package com.example.rent.movieapp.search;
 
 import com.example.rent.movieapp.listing.MovieItem;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
@@ -10,8 +11,11 @@ import java.util.List;
 
 public class MovieResult {
 
+    @SerializedName("Search")
     private List<MovieItem> items;
     private String totalResults;
+
+    @SerializedName("Response")
     private String response;
 
     public List<MovieItem> getItems() {
@@ -36,7 +40,5 @@ public class MovieResult {
 
     public String getResponse() {
         return response;
-
-
     }
 }

@@ -7,5 +7,5 @@ import retrofit2.Retrofit;
  */
 public interface RetrofitProvider {
 
-    Retrofit retrofitProvider();
+    Retrofit provideRetrofit();
 }

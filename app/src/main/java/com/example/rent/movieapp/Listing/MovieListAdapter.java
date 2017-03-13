@@ -46,7 +46,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MyVi
     }
 
     public void addItems(List<MovieItem> items) {
-        this.items = items;
+        this.items.addAll(items);
         notifyDataSetChanged();
     }
 
@@ -54,7 +54,6 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MyVi
         ImageView poster;
         TextView titleAndYear;
         TextView type;
-        private List<MovieItem> items;
 
         public MyViewHolder(View itemView) {
             super(itemView);
