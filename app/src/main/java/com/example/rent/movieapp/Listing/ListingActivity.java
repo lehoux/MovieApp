@@ -3,6 +3,7 @@ package com.example.rent.movieapp.listing;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -50,18 +51,13 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     FrameLayout noResults;
     @BindView(R.id.counter)
     TextView counterTextView;
+    @BindView(R.id.swipe_refresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private MovieListAdapter adapter;
     private EndlessScrollListener endlessScrollListener;
 
-    public static Intent createIntent(Context context, String title, int year, String typeKey) {
 
-        Intent intent = new Intent(context, ListingActivity.class);
-        intent.putExtra(SEARCH_TITLE, title);
-        intent.putExtra(SEARCH_YEAR, year);
-        intent.putExtra(SEARCH_TYPE, typeKey);
-        return intent;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +71,7 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
         String type = getIntent().getStringExtra(SEARCH_TYPE);
 
         adapter = new MovieListAdapter();
+//        adapter.setOnMovieItemClickListener(this);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         endlessScrollListener = new EndlessScrollListener(layoutManager, getPresenter());
@@ -83,6 +80,16 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
         endlessScrollListener.setCurrentItemListener(this);
         endlessScrollListener.setShowOrHideCounter(this);
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                startLoading(title, year, type);
+            }
+        });
+        startLoading(title, year, type);
+    }
+
+    private void startLoading(String title, int year, String type) {
         getPresenter().getDataAsync(title, year, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -95,6 +102,7 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     }
 
     private void Error(Throwable throwable) {
+        swipeRefreshLayout.setRefreshing(false);
         viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
     }
 
@@ -104,13 +112,24 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     }
 
     private void Success(MovieResult movieResult) {
+        swipeRefreshLayout.setRefreshing(false);
         if ("False".equalsIgnoreCase(movieResult.getResponse())) {
+
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
         } else {
-            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
+            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(swipeRefreshLayout));
             adapter.setItems(movieResult.getItems());
             endlessScrollListener.setTotalItemsNumber(Integer.parseInt(movieResult.getTotalResults()));
         }
+    }
+
+    public static Intent createIntent(Context context, String title, int year, String typeKey) {
+
+        Intent intent = new Intent(context, ListingActivity.class);
+        intent.putExtra(SEARCH_TITLE, title);
+        intent.putExtra(SEARCH_YEAR, year);
+        intent.putExtra(SEARCH_TYPE, typeKey);
+        return intent;
     }
 
     @Override
@@ -127,6 +146,11 @@ public class ListingActivity extends NucleusActivity<ListingPresenter> implement
     @Override
     public void hideCounter() {
         counterTextView.animate().translationX(counterTextView.getWidth() * 2).start();
+    }
+
+    public void onMovieItemClickListener(String imdbID) {
+        startActivity(DetailActivity.createIntent(this, imdbID));
+
     }
 }
 

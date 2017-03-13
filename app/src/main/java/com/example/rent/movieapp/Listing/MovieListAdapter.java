@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.rent.movieapp.R;
+import com.example.rent.movieapp.main.OnMovieItemClickListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,15 @@ import java.util.List;
 public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MyViewHolder> {
 
     private List<MovieItem> items = Collections.emptyList();
+    private OnMovieItemClickListener onMovieItemClickListener;
+
+    public OnMovieItemClickListener getOnMovieItemClickListener() {
+        return onMovieItemClickListener;
+    }
+
+    public void setOnMovieItemClickListener(OnMovieItemClickListener onMovieItemClickListener) {
+        this.onMovieItemClickListener = onMovieItemClickListener;
+    }
 
     public MovieListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
@@ -32,6 +42,11 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MyVi
         Glide.with(holder.poster.getContext()).load(items.get(position).getPoster()).into(holder.poster);
         holder.titleAndYear.setText(movieItem.getTitle() + " (" + movieItem.getYear() + ")");
         holder.type.setText("typ: " + movieItem.getType());
+        holder.itemView.setOnClickListener(v -> {
+            if (onMovieItemClickListener != null) {
+                onMovieItemClickListener.onMovieItemClick(movieItem.getImdbID());
+            }
+        });
     }
 
     @Override
@@ -48,6 +63,10 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MyVi
     public void addItems(List<MovieItem> items) {
         this.items.addAll(items);
         notifyDataSetChanged();
+    }
+
+    public void setOnMovieItemClickListener(ListingActivity listingActivity) {
+
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
